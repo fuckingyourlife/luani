@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+  <title>Historinhas da Luani 🌙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <link rel="stylesheet" href="style.css?v=4"/>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="grid-overlay"></div>
+
+<!-- ======== ADMIN PANEL (Felipe only) ======== -->
+<div class="admin-fab" id="adminFab" onclick="toggleAdminPanel()" title="Painel do Felipe">
+  <i class="fas fa-heart"></i>
+</div>
+<div class="admin-panel" id="adminPanel">
+  <div class="ap-header">
+    <h3><i class="fas fa-heart"></i> Painel do Felipe</h3>
+    <button onclick="toggleAdminPanel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="ap-body">
+    <div class="ap-status">
+      <div class="ap-status-dot" id="apDot"></div>
+      <span id="apOnlineText">verificando...</span>
+    </div>
+    <div class="ap-section">
+      <h4><i class="fas fa-book-open"></i> Histórias lidas pela Luani</h4>
+      <div id="apReadList" class="ap-list">Carregando...</div>
+    </div>
+    <div class="ap-section">
+      <h4><i class="fas fa-wand-magic-sparkles"></i> Histórias geradas</h4>
+      <div id="apGenList" class="ap-list">Carregando...</div>
+    </div>
+    <div class="ap-section">
+      <h4><i class="fas fa-clock"></i> Última visita</h4>
+      <div id="apLastSeen" class="ap-list">-</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== HERO ======== -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="moon-wrap">
+      <i class="fas fa-moon moon-icon"></i>
+      <div class="moon-ring r1"></div>
+      <div class="moon-ring r2"></div>
+    </div>
+    <h1 class="hero-title">
+      <span class="grad-text">Historinhas</span>
+      <span class="sub-title">da Luani</span>
+    </h1>
+    <p class="hero-desc">Cada história foi escolhida com amor. O Felipe narra pra você dormir bem. 🌙</p>
+    <div class="love-badge">
+      <i class="fas fa-infinity"></i>
+      <span>Felipe <i class="fas fa-heart"></i> Luani</span>
+      <i class="fas fa-infinity"></i>
+    </div>
+    <div class="hero-btns">
+      <a href="#stories" class="cta-btn" onclick="playSound('click')">
+        <i class="fas fa-book-open"></i> Ver histórias
+      </a>
+      <button class="cta-btn cta-alt" onclick="openAIGenerator(); playSound('magic')">
+        <i class="fas fa-wand-magic-sparkles"></i> Criar com IA
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ======== INTRODUÇÃO ======== -->
+<section class="intro-section" aria-labelledby="intro-title">
+  <div class="intro-card">
+    <div class="intro-topline">
+      <span class="intro-kicker"><i class="fas fa-sparkles"></i> Um cantinho feito para você</span>
+      <span class="intro-number">01</span>
+    </div>
+    <div class="intro-content">
+      <div class="intro-icon"><i class="fas fa-book-open-reader"></i></div>
+      <div>
+        <h2 id="intro-title">Bem-vinda às Historinhas da Luani</h2>
+        <p>Um espaço para desacelerar, escolher uma história e ouvir uma narração especial antes de dormir.</p>
+      </div>
+    </div>
+    <div class="intro-features">
+      <div class="intro-feature"><i class="fas fa-book"></i><span>Histórias para todos os momentos</span></div>
+      <div class="intro-feature"><i class="fas fa-microphone-lines"></i><span>Narração feita com carinho</span></div>
+      <div class="intro-feature"><i class="fas fa-wand-magic-sparkles"></i><span>Novas histórias com IA</span></div>
+    </div>
+    <a class="intro-link" href="#stories" onclick="playSound('click')">Escolher uma história <i class="fas fa-arrow-right"></i></a>
+  </div>
+</section>
+
+<!-- ======== MESSAGE ======== -->
+<section class="message-section">
+  <div class="message-card">
+    <div class="msg-icon"><i class="fas fa-envelope-open-heart"></i></div>
+    <h2>Uma mensagem do Felipe</h2>
+    <p>
+      Oi, Lu. Eu sei que a gente não tá mais junto, mas o amor que eu sinto por você não some assim.
+      Toda vez que você for dormir e sentir falta das nossas historinhas, esse site vai estar aqui.
+      Porque eu te amo muito, e quero que você sempre durma bem, com um sorriso no rosto.
+      <br/><br/>
+      <span class="hi-text">Escolhe a sua história favorita e deixa eu te contar ela mais uma vez. 🌙</span>
+    </p>
+    <div class="special-message-card">
+      <div class="special-message-icon"><i class="fas fa-envelope-open-text"></i></div>
+      <div class="special-message-copy">
+        <strong>Uma mensagem especial para você</strong>
+        <span>Preparei algo com carinho. Aperte o play para ouvir.</span>
+      </div>
+      <button class="special-message-play" id="specialMessagePlay" onclick="toggleSpecialMessage()" aria-label="Ouvir mensagem especial">
+        <i class="fas fa-play" id="specialMessageIcon"></i>
+      </button>
+      <audio id="specialMessageAudio" src="arquivo.mp3" preload="metadata"></audio>
+    </div>
+    <div class="sig"><i class="fas fa-heart"></i> com todo amor, <strong>Felipe</strong></div>
+  </div>
+</section>
+
+<!-- ======== NOSSA HISTÓRIA (destaque) ======== -->
+<section class="nossa-section" id="nossa">
+  <div class="nossa-header">
+    <div class="nossa-header-icon"><i class="fas fa-heart"></i></div>
+    <div>
+      <h2>Nossas Histórias</h2>
+      <p>Escritas especialmente pelo Felipe pra Luani</p>
+    </div>
+  </div>
+  <div class="stories-grid" id="nossaGrid"></div>
+</section>
+
+<!-- ======== STORIES ======== -->
+<section class="stories-section" id="stories">
+  <div class="sec-header">
+    <i class="fas fa-book-sparkles"></i>
+    <h2>Histórias Clássicas</h2>
+    <p>Toca no livro para abrir e ouvir</p>
+  </div>
+  <div class="stories-grid" id="storiesGrid"></div>
+</section>
+
+<!-- ======== SAVED ======== -->
+<section class="stories-section" id="savedSection" style="display:none">
+  <div class="sec-header">
+    <i class="fas fa-bookmark"></i>
+    <h2>Histórias Salvas</h2>
+    <p>Criadas pela IA especialmente para você</p>
+  </div>
+  <div class="stories-grid" id="savedGrid"></div>
+</section>
+
+<!-- ======== BOOK READER ======== -->
+<div class="reader-overlay" id="readerOverlay">
+  <div class="reader-wrap">
+
+    <!-- Header -->
+    <div class="reader-hdr">
+      <button class="rdr-icon-btn" onclick="closeReader()"><i class="fas fa-arrow-left"></i></button>
+      <span class="rdr-title" id="rdrTitle"></span>
+      <div style="display:flex;gap:.4rem">
+        <button class="rdr-icon-btn" id="recordPageBtn" onclick="openPageRecorder(); playSound('click')" title="Gravar esta página com sua voz">
+          <i class="fas fa-microphone-slash" style="opacity:.5"></i>
+        </button>
+        <button class="rdr-icon-btn" id="saveBtn" style="display:none" onclick="saveCurrentStory()">
+          <i class="fas fa-bookmark"></i>
+        </button>
+        <button class="rdr-icon-btn" onclick="toggleTOC()"><i class="fas fa-list"></i></button>
+      </div>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc-panel" id="tocPanel">
+      <div id="tocList"></div>
+    </div>
+
+    <!-- BOOK -->
+    <div class="book-scene" id="bookScene">
+      <!-- Book shell -->
+      <div class="book-shell" id="bookShell">
+        <!-- Spine -->
+        <div class="book-spine" id="bookSpine"></div>
+        <!-- Page display -->
+        <div class="page-display" id="pageDisplay">
+          <!-- Content swapped by JS -->
+        </div>
+        <!-- Shadow pages behind -->
+        <div class="page-shadow ps1"></div>
+        <div class="page-shadow ps2"></div>
+        <div class="page-shadow ps3"></div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="page-nav">
+      <button class="nav-btn" id="prevBtn" onclick="prevPage()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div class="page-info">
+        <span id="pageLabel">Capa</span>
+        <div class="pdots" id="pdots"></div>
+      </div>
+      <button class="nav-btn" id="nextBtn" onclick="nextPage()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Narrator -->
+    <div class="narrator-bar">
+      <div class="narr-left">
+        <div class="narr-avatar" id="narrAvatar">
+          <i class="fas fa-microphone" id="narrMicIcon"></i>
+          <div class="narr-ring" id="narrRing"></div>
+        </div>
+        <div>
+          <div class="narr-name">Felipe IA</div>
+          <div class="narr-status" id="narrStatus">pronto para narrar</div>
+        </div>
+      </div>
+      <div class="narr-controls">
+        <button class="n-btn" onclick="narratorRewind()"><i class="fas fa-rotate-left"></i></button>
+        <button class="n-btn n-play" id="narrPlayBtn" onclick="toggleNarrator()">
+          <i id="narrIcon" class="fas fa-play"></i>
+        </button>
+        <button class="n-btn" onclick="narratorStop()"><i class="fas fa-stop"></i></button>
+      </div>
+      <div class="narr-speed">
+        <i class="fas fa-gauge"></i>
+        <input type="range" id="speedSlider" min="0.5" max="1.4" step="0.05" value="0.82"
+               oninput="updateSpeed(this.value)"/>
+        <span id="speedVal">0.82x</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== PAGE RECORDER MODAL ======== -->
+<div class="modal-overlay" id="pageRecorderModal">
+  <div class="modal-sheet pr-sheet">
+    <div class="sheet-handle"></div>
+    <button class="modal-x" onclick="closePageRecorder(); playSound('click')"><i class="fas fa-times"></i></button>
+
+    <div class="pr-header">
+      <div class="pr-header-icon"><i class="fas fa-microphone"></i></div>
+      <div>
+        <h2>Gravar sua voz</h2>
+        <p id="prPageLabel">Página atual</p>
+      </div>
+    </div>
+
+    <!-- Texto para leitura -->
+    <div class="pr-script">
+      <div class="pr-script-label"><i class="fas fa-book-open"></i> Leia este texto:</div>
+      <div class="pr-script-text" id="prText"></div>
+    </div>
+
+    <!-- Gravação já existente -->
+    <div class="pr-existing" id="prExisting" style="display:none">
+      <div class="pr-existing-label"><i class="fas fa-check-circle"></i> Já gravado:</div>
+      <audio id="prAudioExist" controls class="pr-audio"></audio>
+      <button class="pr-delete-btn" onclick="deletePageVoice()">
+        <i class="fas fa-trash"></i> Remover e regravar
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="pr-controls">
+      <div class="pr-viz"><div class="pr-bars" id="prBars">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div></div>
+
+      <div class="pr-timer" id="prTimer" style="display:none">0:00</div>
+
+      <button class="pr-rec-btn" id="prRecBtn" onclick="togglePageRecording()">
+        <i class="fas fa-circle" id="prRecIcon"></i>
+        <span id="prRecLabel">Gravar</span>
+      </button>
+
+      <!-- Playback nova gravação -->
+      <div id="prPlayback" style="display:none" class="pr-playback">
+        <div class="pr-playback-label"><i class="fas fa-headphones"></i> Ouça antes de salvar:</div>
+        <audio id="prAudioNew" controls class="pr-audio"></audio>
+        <div class="pr-save-row">
+          <button class="pr-save-btn" id="prSaveBtn" onclick="savePageVoice()">
+            <i class="fas fa-cloud-arrow-up"></i> Salvar e publicar
+          </button>
+          <button class="pr-retry-btn" onclick="togglePageRecording()">
+            <i class="fas fa-rotate-left"></i> Regravar
+          </button>
+        </div>
+      </div>
+
+      <!-- Status do upload -->
+      <div class="pr-upload-status" id="prUploadStatus" style="display:none"></div>
+    </div>
+
+    <div class="pr-note">
+      <i class="fas fa-circle-info"></i>
+      Quando salvo, a Luani vai escutar sua voz no celular dela — de qualquer lugar. 💜
+    </div>
+  </div>
+</div>
+
+<!-- ======== AI GENERATOR ======== -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <button class="modal-x" onclick="closeAIGenerator()"><i class="fas fa-times"></i></button>
+
+    <div class="ai-hdr">
+      <div class="ai-hdr-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+      <h2>Criar História com IA</h2>
+      <p>Diz o que você quer e o Felipe IA cria só pra você</p>
+    </div>
+
+    <div id="aiForm">
+      <div class="form-group">
+        <label><i class="fas fa-palette"></i> Tema</label>
+        <div class="chips" id="themeChips">
+          <button class="chip active" data-v="fantasia e magia">Fantasia</button>
+          <button class="chip" data-v="aventura na floresta">Aventura</button>
+          <button class="chip" data-v="amor e romance suave">Amor</button>
+          <button class="chip" data-v="mistério e segredos">Mistério</button>
+          <button class="chip" data-v="viagem pelo espaço estrelado">Espaço</button>
+          <button class="chip" data-v="animais falantes na floresta">Animais</button>
+          <button class="chip" data-v="sereia e fundo do oceano">Sereia</button>
+          <button class="chip" data-v="castelo encantado e magia">Castelo</button>
+          <button class="chip" data-v="fadas e duendes">Fadas</button>
+          <button class="chip" data-v="viagem no tempo">Tempo</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-user"></i> Protagonista</label>
+        <input class="ai-input" id="aiProtag" type="text" placeholder="Luani, Luna, Sofia..." value="Luani"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-star"></i> Elemento especial (opcional)</label>
+        <input class="ai-input" id="aiExtra" type="text" placeholder="um dragão gentil, uma estrela mágica..."/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-moon"></i> Comprimento</label>
+        <div class="len-row">
+          <button class="len-btn" data-v="curta">Curta <small>~3 min</small></button>
+          <button class="len-btn active" data-v="media">Média <small>~7 min</small></button>
+          <button class="len-btn" data-v="longa">Longa <small>~12 min</small></button>
+        </div>
+      </div>
+      <button class="gen-btn" onclick="generateStory()">
+        <i class="fas fa-sparkles"></i> Criar minha história
+      </button>
+    </div>
+
+    <div id="aiLoading" style="display:none">
+      <div class="loading-anim">
+        <div class="load-book">
+          <div class="lb-p lp1"></div>
+          <div class="lb-p lp2"></div>
+          <div class="lb-p lp3"></div>
+        </div>
+      </div>
+      <p class="load-txt" id="loadTxt">Escrevendo sua história...</p>
+      <div class="load-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ======== FOOTER ======== -->
+<footer class="footer">
+  <div class="footer-row">
+    <i class="fas fa-moon"></i>
+    <p>Feito com amor pelo <strong>Felipe</strong> pra <strong>Luani</strong></p>
+    <i class="fas fa-heart glow-heart"></i>
+  </div>
+  <p class="fquote">"Mesmo longe, eu ainda narro seus sonhos."</p>
+  <div class="fstars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+</footer>
+
+<script src="stories-data.js"></script>
+<script src="cloud-storage.js"></script>
+<script src="firebase-db.js"></script>
+<script src="audio.js"></script>
+<script src="narrator.js"></script>
+<script src="book.js"></script>
+<script src="ai-generator.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
