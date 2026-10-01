@@ -60,7 +60,7 @@
       <span class="grad-text">Historinhas</span>
       <span class="sub-title">da Luani</span>
     </h1>
-    <p class="hero-desc">Cada história foi escolhida com amor. O Felipe narra pra você dormir bem. 🌙</p>
+    <p class="hero-desc">Um céu de histórias para ouvir, imaginar e sonhar. Escolha um livro ou crie um mundo novo com a IA. 🌙</p>
     <div class="love-badge">
       <i class="fas fa-infinity"></i>
       <span>Felipe <i class="fas fa-heart"></i> Luani</span>
@@ -143,8 +143,8 @@
 <section class="stories-section" id="stories">
   <div class="sec-header">
     <i class="fas fa-book-sparkles"></i>
-    <h2>Histórias Clássicas</h2>
-    <p>Toca no livro para abrir e ouvir</p>
+    <h2>Histórias</h2>
+    <p>Clássicas e criadas com IA — toque no livro para abrir e ouvir</p>
   </div>
   <div class="stories-grid" id="storiesGrid"></div>
 </section>
@@ -322,32 +322,26 @@
     <div class="ai-hdr">
       <div class="ai-hdr-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
       <h2>Criar História com IA</h2>
-      <p>Diz o que você quer e o Felipe IA cria só pra você</p>
+      <p>Comece com uma ideia — ou deixe a imaginação criar tudo do zero</p>
     </div>
 
     <div id="aiForm">
       <div class="form-group">
-        <label><i class="fas fa-palette"></i> Tema</label>
-        <div class="chips" id="themeChips">
-          <button class="chip active" data-v="fantasia e magia">Fantasia</button>
-          <button class="chip" data-v="aventura na floresta">Aventura</button>
-          <button class="chip" data-v="amor e romance suave">Amor</button>
-          <button class="chip" data-v="mistério e segredos">Mistério</button>
-          <button class="chip" data-v="viagem pelo espaço estrelado">Espaço</button>
-          <button class="chip" data-v="animais falantes na floresta">Animais</button>
-          <button class="chip" data-v="sereia e fundo do oceano">Sereia</button>
-          <button class="chip" data-v="castelo encantado e magia">Castelo</button>
-          <button class="chip" data-v="fadas e duendes">Fadas</button>
-          <button class="chip" data-v="viagem no tempo">Tempo</button>
-        </div>
+        <label for="aiIdea"><i class="fas fa-lightbulb"></i> Sua ideia <span class="ai-optional">opcional</span></label>
+        <textarea class="ai-input ai-textarea" id="aiIdea" maxlength="900" rows="3" placeholder="Ex.: uma entregadora encontra cartas que chegam do futuro; quero descobrir quem as escreveu..."></textarea>
+        <small class="ai-hint">Pode ser um detalhe, uma cena, uma pergunta ou nada. A IA inventa o resto.</small>
       </div>
       <div class="form-group">
-        <label><i class="fas fa-user"></i> Protagonista</label>
-        <input class="ai-input" id="aiProtag" type="text" placeholder="Luani, Luna, Sofia..." value="Luani"/>
+        <label for="aiProtag"><i class="fas fa-user"></i> Personagem ou protagonista <span class="ai-optional">opcional</span></label>
+        <input class="ai-input" id="aiProtag" type="text" maxlength="120" placeholder="Nome, personalidade ou deixe a IA inventar"/>
       </div>
       <div class="form-group">
-        <label><i class="fas fa-star"></i> Elemento especial (opcional)</label>
-        <input class="ai-input" id="aiExtra" type="text" placeholder="um dragão gentil, uma estrela mágica..."/>
+        <label for="aiStyle"><i class="fas fa-feather"></i> Clima ou jeito de contar <span class="ai-optional">opcional</span></label>
+        <input class="ai-input" id="aiStyle" type="text" maxlength="180" placeholder="Ex.: engraçada e esperta, suspense leve, realista..."/>
+      </div>
+      <div class="form-group">
+        <label for="aiExtra"><i class="fas fa-star"></i> Detalhes indispensáveis <span class="ai-optional">opcional</span></label>
+        <textarea class="ai-input ai-textarea" id="aiExtra" maxlength="500" rows="2" placeholder="Cenas, temas, final desejado ou coisas para evitar"></textarea>
       </div>
       <div class="form-group">
         <label><i class="fas fa-moon"></i> Comprimento</label>
@@ -357,8 +351,20 @@
           <button class="len-btn" data-v="longa">Longa <small>~12 min</small></button>
         </div>
       </div>
-      <button class="gen-btn" onclick="generateStory()">
-        <i class="fas fa-sparkles"></i> Criar minha história
+      <details class="ai-illustration-setup">
+        <summary><i class="fas fa-image"></i> Ilustrar a história com imagens de IA</summary>
+        <p>A IA pode criar uma capa e uma ilustração para cada capítulo. Isso usa o saldo Pollen da sua conta Pollinations; a quantidade de imagens depende do tamanho do livro.</p>
+        <label class="ai-key-label" for="pollinationsClientId">Chave pública do app (pk_...)</label>
+        <div class="ai-connect-row">
+          <input class="ai-input" id="pollinationsClientId" type="text" maxlength="180" autocomplete="off" placeholder="pk_..."/>
+          <button class="ai-connect-btn" id="connectPollinationsBtn" type="button" onclick="connectPollinations()"><i class="fas fa-link"></i> Conectar</button>
+        </div>
+        <small class="ai-hint" id="pollinationsStatus">Crie uma chave pública em enter.pollinations.ai/keys e cadastre como retorno a URL desta página.</small>
+        <a class="ai-key-link" href="https://enter.pollinations.ai/keys" target="_blank" rel="noopener">Abrir Pollinations Keys <i class="fas fa-arrow-up-right-from-square"></i></a>
+        <button class="ai-disconnect-btn" id="disconnectPollinationsBtn" type="button" onclick="disconnectPollinations()" style="display:none">Desconectar esta sessão</button>
+      </details>
+      <button class="gen-btn" type="button" onclick="generateStory()">
+        <i class="fas fa-sparkles"></i> Criar minha história e ilustrar
       </button>
     </div>
 
