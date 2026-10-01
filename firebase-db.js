@@ -165,40 +165,108 @@ function getReadStories(cb) {
 // HISTÓRIAS GERADAS PELA IA
 // ================================================================
 function saveAIStoryDB(story) {
+  const savedStory = { ...story, savedAt: new Date().toISOString(), isAI: true };
   try {
-    const saved = JSON.parse(localStorage.getItem('luani_ai_stories') || '[]');
-    if (!saved.find(s => s.id === story.id)) {
-      saved.push({ ...story, savedAt: new Date().toISOString() });
-      localStorage.setItem('luani_ai_stories', JSON.stringify(saved));
-    }
+    const saved = getSavedLocalStories().filter(s => s.id !== story.id);
+    saved.push(savedStory);
+    localStorage.setItem('luani_ai_stories', JSON.stringify(saved));
+    const deleted = JSON.parse(localStorage.getItem('luani_ai_story_deletions') || '[]')
+      .filter(deletedId => deletedId !== story.id);
+    localStorage.setItem('luani_ai_story_deletions', JSON.stringify(deleted));
   } catch {}
   if (!DB) return;
-  DB.ref(`ai_stories/${story.id}`).set({
-    id: story.id, title: story.title, desc: story.desc, tag: story.tag,
-    savedAt: new Date().toISOString(),
-    pages: story.pages.map(p => ({ title: p.title, text: p.text }))
-  });
+  DB.ref(`ai_stories/${story.id}`).set(savedStory)
+    .then(() => DB.ref(`ai_story_deletions/${story.id}`).remove())
+    .catch(err => console.warn('[Firebase] não foi possível sincronizar a história:', err));
 }
 
 function getAIStoriesDB(cb) {
-  if (DB) { DB.ref('ai_stories').once('value', s => cb(s.val() || {})); return; }
-  try {
-    const arr = JSON.parse(localStorage.getItem('luani_ai_stories') || '[]');
-    const obj = {}; arr.forEach(s => obj[s.id] = s);
-    cb(obj);
-  } catch { cb({}); }
+  const deliver = (remote = {}, remoteDeleted = {}) => {
+    const local = getSavedLocalStories();
+    const localDeleted = (() => {
+      try { return JSON.parse(localStorage.getItem('luani_ai_story_deletions') || '[]'); }
+      catch { return []; }
+    })();
+    const merged = {};
+    local.forEach(story => { if (story?.id) merged[story.id] = story; });
+    Object.entries(remote || {}).forEach(([id, story]) => {
+      const prior = merged[id] || {};
+      const cover = story.cover || prior.cover || '';
+      const remotePages = Array.isArray(story.pages) ? story.pages : Object.values(story.pages || {});
+      merged[id] = {
+        ...prior,
+        ...story,
+        id,
+        cover,
+        coverBg: story.coverBg || prior.coverBg || '#150830',
+        tag: story.tag || 'Criada pela IA',
+        desc: story.desc || prior.desc || 'Uma história especial criada pela IA.',
+        time: story.time || prior.time || `~${remotePages.length * 2} min`,
+        mood: story.mood || prior.mood || 'Especial',
+        isAI: true,
+        pages: remotePages.length
+          ? remotePages.map(page => ({ ...page, img: page.img || cover, text: page.text || '' }))
+          : prior.pages || [],
+        createdAt: story.createdAt || prior.createdAt || ''
+      };
+    });
+
+    const deletedIds = new Set([...localDeleted, ...Object.keys(remoteDeleted || {})].map(String));
+    deletedIds.forEach(id => delete merged[id]);
+    const entries = Object.values(merged);
+    try { localStorage.setItem('luani_ai_stories', JSON.stringify(entries)); } catch {}
+    const result = {};
+    entries.forEach(story => { result[story.id] = story; });
+    cb(result);
+  };
+
+  if (DB) {
+    Promise.all([
+      DB.ref('ai_stories').once('value'),
+      DB.ref('ai_story_deletions').once('value')
+    ]).then(([storiesSnap, deletedSnap]) => {
+      deliver(storiesSnap.val() || {}, deletedSnap.val() || {});
+    }).catch(() => deliver());
+    return;
+  }
+  deliver();
 }
 
 function getSavedLocalStories() {
-  try { return JSON.parse(localStorage.getItem('luani_ai_stories') || '[]'); } catch { return []; }
+  try {
+    const arr = JSON.parse(localStorage.getItem('luani_ai_stories') || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
 }
 
-function deleteSavedStoryDB(id) {
+async function deleteSavedStoryDB(id, story = null) {
+  id = String(id);
+  const stored = getSavedLocalStories().find(item => String(item.id) === id);
+  const storyToDelete = story || stored || {};
+  const pageCount = Array.isArray(storyToDelete.pages) ? storyToDelete.pages.length : 0;
   try {
-    let arr = getSavedLocalStories().filter(s => s.id !== id);
-    localStorage.setItem('luani_ai_stories', JSON.stringify(arr));
+    localStorage.setItem('luani_ai_stories', JSON.stringify(
+      getSavedLocalStories().filter(item => String(item.id) !== id)
+    ));
+    const deleted = JSON.parse(localStorage.getItem('luani_ai_story_deletions') || '[]');
+    if (!deleted.map(String).includes(id)) deleted.push(id);
+    localStorage.setItem('luani_ai_story_deletions', JSON.stringify(deleted));
   } catch {}
-  if (DB) DB.ref(`ai_stories/${id}`).remove();
+
+  const cleanup = [];
+  if (DB) {
+    cleanup.push(DB.ref(`ai_stories/${id}`).remove());
+    cleanup.push(DB.ref(`ai_story_deletions/${id}`).set({ deletedAt: new Date().toISOString() }));
+    cleanup.push(DB.ref(`recorded/${id}`).remove());
+  }
+  for (let pageIndex = 0; pageIndex <= pageCount; pageIndex++) {
+    localStorage.removeItem(`voice_${id}_${pageIndex}`);
+    localStorage.setItem(`voice_removed_${id}_${pageIndex}`, '1');
+    if (typeof deleteAudioIndex === 'function') deleteAudioIndex(id, pageIndex);
+    if (typeof invalidateVoiceCache === 'function') invalidateVoiceCache(id, pageIndex);
+    if (typeof deleteVoiceStorage === 'function') cleanup.push(deleteVoiceStorage(id, pageIndex));
+  }
+  await Promise.allSettled(cleanup);
 }
 
 // ================================================================
@@ -227,9 +295,28 @@ function loadAdminData() {
     const el = document.getElementById('apGenList');
     if (!el) return;
     const entries = Object.entries(data);
-    el.innerHTML = entries.length
-      ? entries.map(([,d]) => `<div class="ap-item"><i class="fas fa-wand-magic-sparkles"></i> <strong>${d.title}</strong></div>`).join('')
-      : 'Nenhuma ainda';
+    el.replaceChildren();
+    if (!entries.length) { el.textContent = 'Nenhuma ainda'; return; }
+    entries.forEach(([id, story]) => {
+      const item = document.createElement('div');
+      item.className = 'ap-item ap-story-item';
+      const title = document.createElement('span');
+      title.className = 'ap-story-title';
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-wand-magic-sparkles';
+      const name = document.createElement('strong');
+      name.textContent = story.title || 'Sem título';
+      title.append(icon, name);
+      const remove = document.createElement('button');
+      remove.className = 'ap-delete';
+      remove.type = 'button';
+      remove.title = 'Apagar história';
+      remove.setAttribute('aria-label', `Apagar ${story.title || 'história'}`);
+      remove.innerHTML = '<i class="fas fa-trash"></i>';
+      remove.addEventListener('click', () => deleteAdminAIStory(id, story));
+      item.append(title, remove);
+      el.appendChild(item);
+    });
   });
 }
 

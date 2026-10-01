@@ -79,15 +79,21 @@ async function generateStory() {
   try {
     const story = await callPollinationsAI(protag, aiTheme, extra, pages);
     clearInterval(itv);
-    closeAIGenerator();
-    setTimeout(() => { playSound('magic'); openReader(story, true); }, 200);
+    showGeneratedStory(story);
   } catch (err) {
     clearInterval(itv);
     console.warn('AI API error, using fallback:', err.message);
     const story = buildFallbackStory(protag, aiTheme, extra, pages);
-    closeAIGenerator();
-    setTimeout(() => { playSound('magic'); openReader(story, true); }, 200);
+    showGeneratedStory(story);
   }
+}
+
+function showGeneratedStory(story) {
+  saveAIStoryDB(story);
+  renderStoryCards();
+  renderSavedStories();
+  closeAIGenerator();
+  setTimeout(() => { playSound('magic'); openReader(story, true); }, 200);
 }
 
 // ----------------------------------------------------------------

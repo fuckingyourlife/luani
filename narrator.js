@@ -215,7 +215,7 @@ const FELIPE_PIN = '1234'; // mude esta senha para o que quiser
 function checkPin() {
   const saved = localStorage.getItem('fp_auth');
   if (saved === FELIPE_PIN) return true;
-  const entered = prompt('🔒 Área do Felipe\nDigite a senha para gravar:');
+  const entered = prompt('🔒 Área do Felipe\nDigite a senha para continuar:');
   if (entered === null) return false;       // cancelou
   if (entered === FELIPE_PIN) {
     localStorage.setItem('fp_auth', FELIPE_PIN);

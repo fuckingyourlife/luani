@@ -32,7 +32,10 @@ function openReader(story, fromAI = false) {
 
   // Save button visibility
   const sb = document.getElementById('saveBtn');
-  if (sb) sb.style.display = fromAI ? 'flex' : 'none';
+  if (sb) {
+    const alreadySaved = getSavedLocalStories().some(saved => saved.id === story.id);
+    sb.style.display = fromAI && !alreadySaved ? 'flex' : 'none';
+  }
 
   document.getElementById('rdrTitle').textContent = story.title;
 
@@ -273,6 +276,7 @@ function saveCurrentStory() {
   saveAIStoryDB(currentStory);
   playSound('save');
   showToast('História salva! 📚');
+  renderStoryCards();
   renderSavedStories();
 
   const sb = document.getElementById('saveBtn');

@@ -965,6 +965,14 @@ body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text);
   background:rgba(168,85,247,.06); border:1px solid rgba(168,85,247,.1);
   display:flex; flex-direction:column; gap:.15rem;
 }
+.ap-item.ap-story-item { flex-direction:row; align-items:center; justify-content:space-between; gap:.6rem; }
+.ap-story-title { display:flex; align-items:center; min-width:0; }
+.ap-delete {
+  flex-shrink:0; padding:.35rem .55rem; border-radius:8px;
+  background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3);
+  color:#f87171; cursor:pointer; transition:background .2s;
+}
+.ap-delete:hover { background:rgba(239,68,68,.24); }
 .ap-item i { color:var(--pu-l); margin-right:.4rem; }
 
 /* ============================================================

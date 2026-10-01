@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderStoryCards();
   renderSavedStories();
   initReveal();
+  getAIStoriesDB(() => {
+    renderStoryCards();
+    renderSavedStories();
+  });
 });
 
 // ----------------------------------------------------------------
@@ -53,9 +57,11 @@ function renderNossasHistorias() {
 // ----------------------------------------------------------------
 function renderStoryCards() {
   const grid = document.getElementById('storiesGrid');
+  if (!grid) return;
   grid.innerHTML = '';
   const outros = STORIES.filter(s => s.tag !== 'Nossa História');
-  outros.forEach((s, i) => {
+  const generated = getSavedLocalStories().filter(s => s.isAI || s.tag === 'Criada pela IA');
+  [...outros, ...generated].forEach((s, i) => {
     const card = makeCard(s, false);
     card.style.animationDelay = (i * 0.06) + 's';
     grid.appendChild(card);
@@ -63,14 +69,8 @@ function renderStoryCards() {
 }
 
 function renderSavedStories() {
-  const saved   = getSavedLocalStories();
   const section = document.getElementById('savedSection');
-  const grid    = document.getElementById('savedGrid');
-  grid.innerHTML = '';
-
-  if (!saved.length) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  saved.forEach(s => grid.appendChild(makeCard(s, true)));
+  if (section) section.style.display = 'none';
 }
 
 function makeCard(s, isSaved) {
@@ -166,6 +166,17 @@ function toggleAdminPanel() {
   const panel = document.getElementById('adminPanel');
   panel.classList.toggle('open', adminOpen);
   if (adminOpen) { loadAdminData(); playSound('click'); }
+}
+
+async function deleteAdminAIStory(id, story) {
+  if (!checkPin()) return;
+  if (!confirm(`Apagar a história “${story.title || 'Sem título'}”?`)) return;
+
+  await deleteSavedStoryDB(id, story);
+  renderStoryCards();
+  renderSavedStories();
+  loadAdminData();
+  showToast('História apagada do feed.');
 }
 
 // ----------------------------------------------------------------
